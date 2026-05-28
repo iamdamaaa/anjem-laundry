@@ -9,22 +9,24 @@ const AdminLayout = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pendingPayments, setPendingPayments] = useState(0);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
-    const fetchPending = async () => {
+    const fetchNotifications = async () => {
       try {
-        const response = await api.get('/admin/payments');
+        const response = await api.get('/admin/dashboard/summary');
         if (response.data?.success) {
-          const count = response.data.data.filter(p => p.status === 'pending').length;
-          setPendingPayments(count);
+          setPendingPayments(response.data.data.pending_payments || 0);
+          setPendingOrders(response.data.data.pending_orders || 0);
         }
       } catch (error) {
         console.error('Failed to fetch notifications', error);
       }
     };
 
-    fetchPending();
-    const interval = setInterval(fetchPending, 30000);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -129,14 +131,62 @@ const AdminLayout = () => {
           </button>
           
           <div className="flex items-center gap-4">
-            <Link to="/admin/payments" className="relative p-2 text-slate-500 hover:text-slate-800 transition-colors" title="Pembayaran Menunggu Konfirmasi">
-              <span className="text-xl">🔔</span>
-              {pendingPayments > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
-                  {pendingPayments}
-                </span>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-slate-500 hover:text-slate-800 transition-colors focus:outline-none" 
+                title="Notifikasi"
+              >
+                <span className="text-xl">🔔</span>
+                {(pendingPayments + pendingOrders) > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
+                    {pendingPayments + pendingOrders}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 z-50 py-2">
+                  <div className="px-4 py-2 border-b border-slate-100">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Notifikasi Baru</h3>
+                  </div>
+                  <div className="py-2">
+                    <Link 
+                      to="/admin/orders" 
+                      onClick={() => setShowNotifications(false)}
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🧺</span>
+                        <span className="text-xs font-semibold text-slate-700">Pesanan Baru Masuk</span>
+                      </div>
+                      {pendingOrders > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                          {pendingOrders}
+                        </span>
+                      )}
+                    </Link>
+                    <Link 
+                      to="/admin/payments" 
+                      onClick={() => setShowNotifications(false)}
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">💳</span>
+                        <span className="text-xs font-semibold text-slate-700">Antrean Pembayaran</span>
+                      </div>
+                      {pendingPayments > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-[10px] font-bold text-amber-600">
+                          {pendingPayments}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+                </div>
               )}
-            </Link>
+            </div>
+            
             <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
               Workspace Aktif
             </span>

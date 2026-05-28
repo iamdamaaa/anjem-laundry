@@ -26,6 +26,8 @@ class Order extends Model
         'notes',
         'pickup_done_at',
         'delivery_done_at',
+        'pickup_date',
+        'completion_date',
     ];
 
     protected $casts = [
@@ -37,6 +39,8 @@ class Order extends Model
         'delivery_done_at' => 'datetime',
         'total_price' => 'decimal:2',
         'total_price_actual' => 'decimal:2',
+        'pickup_date' => 'date',
+        'completion_date' => 'date',
     ];
 
     /**

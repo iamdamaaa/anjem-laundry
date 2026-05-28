@@ -1,41 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
+import PageSkeleton from '../components/shared/PageSkeleton';
 
-// Layouts
+// Layouts (Tetap statis karena mereka structural skeleton)
 import CustomerLayout from '../components/layout/CustomerLayout';
 import StaffLayout from '../components/layout/StaffLayout';
 import AdminLayout from '../components/layout/AdminLayout';
 
 // Public pages
-import Login from '../pages/public/Login';
-import Register from '../pages/public/Register';
-import Invoice from '../pages/public/Invoice';
-import ServicesPage from '../pages/public/ServicesPage';
-import CategoriesPage from '../pages/public/CategoriesPage';
+const Login = lazy(() => import('../pages/public/Login'));
+const Register = lazy(() => import('../pages/public/Register'));
+const Invoice = lazy(() => import('../pages/public/Invoice'));
+const ServicesPage = lazy(() => import('../pages/public/ServicesPage'));
+const CategoriesPage = lazy(() => import('../pages/public/CategoriesPage'));
 
 // Customer pages
-import CustomerDashboard from '../pages/customer/Dashboard';
-import CustomerOrders from '../pages/customer/Orders';
-import CustomerOrderNew from '../pages/customer/OrderNew';
-import CustomerOrderDetail from '../pages/customer/OrderDetail';
-import CustomerProfile from '../pages/customer/Profile';
+const CustomerDashboard = lazy(() => import('../pages/customer/Dashboard'));
+const CustomerOrders = lazy(() => import('../pages/customer/Orders'));
+const CustomerOrderNew = lazy(() => import('../pages/customer/OrderNew'));
+const CustomerOrderDetail = lazy(() => import('../pages/customer/OrderDetail'));
+const CustomerProfile = lazy(() => import('../pages/customer/Profile'));
 
 // Staff pages
-import StaffOrders from '../pages/staff/Orders';
-import StaffOrderDetail from '../pages/staff/OrderDetail';
+const StaffOrders = lazy(() => import('../pages/staff/Orders'));
+const StaffOrderDetail = lazy(() => import('../pages/staff/OrderDetail'));
 
 // Admin pages
-import AdminDashboard from '../pages/admin/Dashboard';
-import AdminOrders from '../pages/admin/Orders';
-import AdminOrderDetail from '../pages/admin/OrderDetail';
-import AdminUsers from '../pages/admin/Users';
-import AdminServices from '../pages/admin/Services';
-import AdminCategories from '../pages/admin/Categories';
-import AdminPayments from '../pages/admin/Payments';
-import AdminStaffMetrics from '../pages/admin/StaffMetrics';
-import AdminNotifications from '../pages/admin/Notifications';
-import AdminErrorLogs from '../pages/admin/ErrorLogs';
+const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'));
+const AdminOrders = lazy(() => import('../pages/admin/Orders'));
+const AdminOrderDetail = lazy(() => import('../pages/admin/OrderDetail'));
+const AdminUsers = lazy(() => import('../pages/admin/Users'));
+const AdminServices = lazy(() => import('../pages/admin/Services'));
+const AdminCategories = lazy(() => import('../pages/admin/Categories'));
+const AdminPayments = lazy(() => import('../pages/admin/Payments'));
+const AdminStaffMetrics = lazy(() => import('../pages/admin/StaffMetrics'));
+const AdminNotifications = lazy(() => import('../pages/admin/Notifications'));
+const AdminErrorLogs = lazy(() => import('../pages/admin/ErrorLogs'));
 
 // Helper to determine landing page based on role
 export const getDefaultRedirect = (role) => {
@@ -115,56 +116,58 @@ export const ProtectedRoute = ({ allowedRoles }) => {
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      {/* Public Routes with Guest Route Guard (Redirect if already logged in) */}
-      <Route element={<GuestRoute />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Route>
-
-      {/* Public Route Accessible by Everyone (No login required) */}
-      <Route path="/invoice/:invoiceToken" element={<Invoice />} />
-      <Route path="/services" element={<ServicesPage />} />
-      <Route path="/categories" element={<CategoriesPage />} />
-
-      {/* Protected Routes for Customer Panel */}
-      <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
-        <Route element={<CustomerLayout />}>
-          <Route path="/dashboard" element={<CustomerDashboard />} />
-          <Route path="/orders" element={<CustomerOrders />} />
-          <Route path="/orders/new" element={<CustomerOrderNew />} />
-          <Route path="/orders/:orderNumber" element={<CustomerOrderDetail />} />
-          <Route path="/profile" element={<CustomerProfile />} />
+    <Suspense fallback={<PageSkeleton />}>
+      <Routes>
+        {/* Public Routes with Guest Route Guard (Redirect if already logged in) */}
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Route>
-      </Route>
 
-      {/* Protected Routes for Staff Panel */}
-      <Route element={<ProtectedRoute allowedRoles={['staff']} />}>
-        <Route element={<StaffLayout />}>
-          <Route path="/staff/orders" element={<StaffOrders />} />
-          <Route path="/staff/orders/:id" element={<StaffOrderDetail />} />
+        {/* Public Route Accessible by Everyone (No login required) */}
+        <Route path="/invoice/:invoiceToken" element={<Invoice />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+
+        {/* Protected Routes for Customer Panel */}
+        <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
+          <Route element={<CustomerLayout />}>
+            <Route path="/dashboard" element={<CustomerDashboard />} />
+            <Route path="/orders" element={<CustomerOrders />} />
+            <Route path="/orders/new" element={<CustomerOrderNew />} />
+            <Route path="/orders/:orderNumber" element={<CustomerOrderDetail />} />
+            <Route path="/profile" element={<CustomerProfile />} />
+          </Route>
         </Route>
-      </Route>
 
-      {/* Protected Routes for Admin Panel */}
-      <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/services" element={<AdminServices />} />
-          <Route path="/admin/categories" element={<AdminCategories />} />
-          <Route path="/admin/payments" element={<AdminPayments />} />
-          <Route path="/admin/staff/metrics" element={<AdminStaffMetrics />} />
-          <Route path="/admin/notifications" element={<AdminNotifications />} />
-          <Route path="/admin/logs" element={<AdminErrorLogs />} />
+        {/* Protected Routes for Staff Panel */}
+        <Route element={<ProtectedRoute allowedRoles={['staff']} />}>
+          <Route element={<StaffLayout />}>
+            <Route path="/staff/orders" element={<StaffOrders />} />
+            <Route path="/staff/orders/:id" element={<StaffOrderDetail />} />
+          </Route>
         </Route>
-      </Route>
 
-      {/* Wildcard / Fallback Redirection */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        {/* Protected Routes for Admin Panel */}
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/services" element={<AdminServices />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
+            <Route path="/admin/staff/metrics" element={<AdminStaffMetrics />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route path="/admin/logs" element={<AdminErrorLogs />} />
+          </Route>
+        </Route>
+
+        {/* Wildcard / Fallback Redirection */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 

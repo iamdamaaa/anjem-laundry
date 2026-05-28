@@ -48,11 +48,11 @@ const Notifications = () => {
   };
 
   return (
-    <div className="space-y-6 font-sans text-brandText">
+    <div className="space-y-6 font-sans text-slate-900">
       
       {/* Header Panel */}
-      <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm">
-        <h1 className="text-2xl font-black text-brandText tracking-tight">Riwayat Pengiriman Notifikasi</h1>
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Riwayat Pengiriman Notifikasi</h1>
         <p className="text-xs text-slate-500 mt-1">
           Lacak logs pengiriman notifikasi terotomatisasi WhatsApp (Fonnte API) dan Email (SMTP) kepada pelanggan laundry.
         </p>
@@ -60,18 +60,18 @@ const Notifications = () => {
 
       {/* Operations feedback alerts */}
       {alertSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-card text-success text-xs font-semibold">
+        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-success text-xs font-semibold">
           ✅ {alertSuccess}
         </div>
       )}
       {alertError && (
-        <div className="p-4 bg-red-50 border border-red-100 rounded-card text-error text-xs font-semibold">
+        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-error text-xs font-semibold">
           ⚠️ {alertError}
         </div>
       )}
 
       {/* Dynamic Tabular Notifications Grid */}
-      <div className="bg-white rounded-card border border-slate-200/60 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -142,7 +142,7 @@ const Notifications = () => {
                           <button
                             disabled={isProcessing}
                             onClick={() => handleRetryNotification(n.id)}
-                            className="px-3 py-1.5 bg-blue-50 border border-blue-200 hover:bg-primary hover:text-white hover:border-primary text-primary text-[10px] font-bold rounded-btn transition-smooth shadow-sm"
+                            className="px-3 py-1.5 bg-blue-50 border border-blue-200 hover:bg-primary hover:text-white hover:border-primary text-primary text-[10px] font-bold rounded-md transition-smooth shadow-sm"
                           >
                             Kirim Ulang
                           </button>

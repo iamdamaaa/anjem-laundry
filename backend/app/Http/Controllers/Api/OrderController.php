@@ -14,6 +14,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+
 
 class OrderController extends Controller
 {
@@ -37,6 +39,7 @@ class OrderController extends Controller
         // 2. Validate request parameters
         $validated = $request->validate([
             'address_id' => 'required|integer',
+            'pickup_date'=> 'required|date|after_or_equal:today',
             'notes'      => 'nullable|string',
             'items'      => 'required|array|min:1',
             'items.*.service_id' => 'required|exists:services,id',
@@ -76,6 +79,7 @@ class OrderController extends Controller
         // 4. Calculate prices on the backend & verify service pricing types
         $itemsData = [];
         $totalPrice = 0.00;
+        $orderDuration = null;
 
         foreach ($validated['items'] as $item) {
             $service = Service::with('category')->find($item['service_id']);
@@ -85,6 +89,17 @@ class OrderController extends Controller
                     'success' => false,
                     'error'   => 'SERVICE_INACTIVE',
                     'message' => "Layanan '{$service->name}' sedang tidak aktif."
+                ], 422);
+            }
+
+            // Enforce single duration per order
+            if ($orderDuration === null) {
+                $orderDuration = $service->duration_hours;
+            } elseif ($orderDuration !== $service->duration_hours) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'MIXED_DURATIONS_NOT_ALLOWED',
+                    'message' => 'Satu pesanan tidak boleh mencampur layanan dengan durasi yang berbeda.'
                 ], 422);
             }
 
@@ -145,6 +160,11 @@ class OrderController extends Controller
             $orderNumber = OrderNumberHelper::generate();
             $invoiceToken = Str::uuid();
 
+            // Calculate completion date based on duration
+            $completionDate = Carbon::parse($validated['pickup_date'])
+                ->addHours((int)$orderDuration)
+                ->toDateString();
+
             $order = Order::create([
                 'user_id'                   => $user->id,
                 'assigned_staff_id'         => null,
@@ -156,6 +176,8 @@ class OrderController extends Controller
                 'is_paid'                   => false,
                 'pickup_address_snapshot'   => $addressSnapshot,
                 'delivery_address_snapshot' => $addressSnapshot,
+                'pickup_date'               => $validated['pickup_date'],
+                'completion_date'           => $completionDate,
                 'notes'                     => $validated['notes'] ?? null,
             ]);
 

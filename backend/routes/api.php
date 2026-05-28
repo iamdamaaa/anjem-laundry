@@ -63,7 +63,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/admin/orders/{id}', [\App\Http\Controllers\Api\Admin\OrderController::class, 'show']);
         Route::patch('/admin/orders/{id}/status', [\App\Http\Controllers\Api\Admin\OrderController::class, 'updateStatus']);
         Route::patch('/admin/orders/{id}/actual', [\App\Http\Controllers\Api\Admin\OrderController::class, 'inputActual']);
+        Route::patch('/admin/orders/{id}/completion-date', [\App\Http\Controllers\Api\Admin\OrderController::class, 'updateCompletionDate']);
         Route::get('/admin/orders/{id}/logs', [\App\Http\Controllers\Api\Admin\OrderController::class, 'getLogs']);
+        Route::delete('/admin/orders/{id}', [\App\Http\Controllers\Api\Admin\OrderController::class, 'destroy']);
         
         // Auto-verified Payment Upload
         Route::post('/admin/orders/{id}/payment', [\App\Http\Controllers\Api\PaymentController::class, 'adminUpload']);
@@ -90,6 +92,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/admin/services', [\App\Http\Controllers\Api\Admin\ServiceController::class, 'store']);
         Route::patch('/admin/services/{id}', [\App\Http\Controllers\Api\Admin\ServiceController::class, 'update']);
         Route::delete('/admin/services/{id}', [\App\Http\Controllers\Api\Admin\ServiceController::class, 'destroy']);
+
+        // Users & Staff CRUD
+        Route::get('/admin/users', [\App\Http\Controllers\Api\Admin\UserController::class, 'index']);
+        Route::post('/admin/users', [\App\Http\Controllers\Api\Admin\UserController::class, 'store']);
+        Route::patch('/admin/users/{id}', [\App\Http\Controllers\Api\Admin\UserController::class, 'update']);
+        Route::delete('/admin/users/{id}', [\App\Http\Controllers\Api\Admin\UserController::class, 'destroy']);
 
         // Staff Metrics
         Route::get('/admin/staff/metrics', [\App\Http\Controllers\Api\Admin\StaffMetricsController::class, 'index']);

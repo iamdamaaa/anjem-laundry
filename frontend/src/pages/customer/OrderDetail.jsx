@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import QRCode from 'react-qr-code';
 import api from '../../lib/api';
 import useAuthStore from '../../stores/authStore';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
@@ -102,15 +103,15 @@ const OrderDetail = () => {
 
   if (errorMsg || !order) {
     return (
-      <div className="bg-white p-12 rounded-card border border-slate-200/60 shadow-sm text-center max-w-md mx-auto space-y-4 font-sans">
+      <div className="bg-white p-12 rounded-2xl border border-slate-200/60 shadow-sm text-center max-w-md mx-auto space-y-4 font-sans">
         <div className="w-12 h-12 rounded-full bg-red-50 text-error flex items-center justify-center text-xl mx-auto font-bold">
           ⚠️
         </div>
-        <h3 className="text-sm font-bold text-brandText">Terjadi Kendala</h3>
+        <h3 className="text-sm font-bold text-slate-900">Terjadi Kendala</h3>
         <p className="text-xs text-slate-500">{errorMsg || 'Rincian pesanan gagal dimuat.'}</p>
         <Link
           to="/orders"
-          className="inline-block px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-btn transition-colors"
+          className="inline-block px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-md transition-colors"
         >
           Kembali ke Riwayat
         </Link>
@@ -141,26 +142,44 @@ const OrderDetail = () => {
     <div className="space-y-8 font-sans">
 
       {/* Header Panel */}
-      <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-black text-brandText">Pesanan #{order.order_number}</h1>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${statusBg}`}>
-              {statusLabel}
-            </span>
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-6">
+          <div className="hidden sm:block p-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <QRCode 
+              value={order.order_number} 
+              size={60} 
+              level="L" 
+            />
           </div>
-          <p className="text-xs text-slate-500">Dibuat pada {formattedDate}</p>
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900">Pesanan #{order.order_number}</h1>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${statusBg}`}>
+                {statusLabel}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">Dibuat pada {formattedDate}</p>
+          </div>
         </div>
 
-        {(order.is_paid || order.order_status !== 'received') && (
-          <Link
-            to={`/invoice/${order.invoice_token}`}
-            target="_blank"
-            className="w-full sm:w-auto px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-btn text-center shadow-md shadow-blue-500/10 transition-colors"
-          >
-            📄 Lihat Invoice
-          </Link>
-        )}
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+          <div className="sm:hidden self-center p-2 bg-white rounded-xl border border-slate-200 shadow-sm mb-2">
+            <QRCode 
+              value={order.order_number} 
+              size={60} 
+              level="L" 
+            />
+          </div>
+          {(order.is_paid || order.order_status !== 'received') && (
+            <Link
+              to={`/invoice/${order.invoice_token}`}
+              target="_blank"
+              className="w-full sm:w-auto px-6 py-3 bg-primary hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-md text-center shadow-sm transition-all duration-150"
+            >
+              📄 Lihat Invoice
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -168,8 +187,8 @@ const OrderDetail = () => {
         <div className="lg:col-span-2 space-y-8">
 
           {/* Vertical Tracking Timeline */}
-          <div className="bg-white p-6 sm:p-8 rounded-card border border-slate-200/60 shadow-sm">
-            <h2 className="text-base font-extrabold text-brandText mb-6">Pelacakan Pesanan</h2>
+          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/60 shadow-sm">
+            <h2 className="text-base font-extrabold text-slate-900 mb-6">Pelacakan Pesanan</h2>
             <div className="relative pl-6 space-y-6">
               {/* Stepper vertical line connector */}
               <div className="absolute left-2 top-2 bottom-2 w-[2px] bg-slate-100"></div>
@@ -203,8 +222,8 @@ const OrderDetail = () => {
           </div>
 
           {/* Itemized list of services */}
-          <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4">
-            <h2 className="text-base font-extrabold text-brandText">Rincian Cucian</h2>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
+            <h2 className="text-base font-extrabold text-slate-900">Rincian Cucian</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -228,7 +247,12 @@ const OrderDetail = () => {
 
                     return (
                       <tr key={item.id}>
-                        <td className="py-3 font-semibold text-slate-900">{item.service_name_snapshot}</td>
+                        <td className="py-3 font-semibold text-slate-900">
+                          {item.service_name_snapshot}
+                          {item.notes && (
+                            <p className="text-[10px] text-amber-600 mt-1 italic font-medium">Catatan Staf: {item.notes}</p>
+                          )}
+                        </td>
                         <td className="py-3 text-center text-slate-500 uppercase">{pricingUnit}</td>
                         <td className="py-3 text-center text-slate-500">{estQty}</td>
                         <td className={`py-3 text-center font-bold ${item.weight_actual_kg || item.quantity_actual ? 'text-primary' : 'text-slate-400'}`}>
@@ -249,7 +273,7 @@ const OrderDetail = () => {
               {order.total_price_actual ? (
                 <>
                   <span className="text-[10px] font-bold text-slate-400">Total Biaya Cucian Terkoreksi:</span>
-                  <span className="text-xl font-black text-brandText">
+                  <span className="text-xl font-black text-slate-900">
                     Rp {parseFloat(order.total_price_actual).toLocaleString('id-ID')}
                   </span>
                   <span className="text-[9px] text-slate-400">
@@ -259,7 +283,7 @@ const OrderDetail = () => {
               ) : (
                 <>
                   <span className="text-[10px] font-bold text-slate-400">Total Estimasi Sementara:</span>
-                  <span className="text-xl font-black text-brandText">
+                  <span className="text-xl font-black text-slate-900">
                     Rp {parseFloat(order.total_price).toLocaleString('id-ID')}
                   </span>
                 </>
@@ -272,8 +296,8 @@ const OrderDetail = () => {
         {/* Right Column - Billing & Payments */}
         <div className="space-y-8">
           {/* Payment Status Info card */}
-          <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4">
-            <h2 className="text-base font-extrabold text-brandText border-b border-slate-50 pb-2">Status Pembayaran</h2>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
+            <h2 className="text-base font-extrabold text-slate-900 border-b border-slate-50 pb-2">Status Pembayaran</h2>
 
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-500 font-medium">Status Tagihan:</span>
@@ -296,13 +320,13 @@ const OrderDetail = () => {
 
             {/* If paid, display beautiful success checkmark */}
             {order.is_paid ? (
-              <div className="p-4 bg-emerald-50 rounded-card border border-emerald-100 text-center space-y-1.5">
+              <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-center space-y-1.5">
                 <span className="text-2xl">🎉</span>
                 <p className="text-xs font-bold text-emerald-800">Cucian Anda Telah Lunas</p>
                 <p className="text-[10px] text-emerald-600">Terima kasih atas kerja samanya. Pakaian Anda diproses dengan cinta.</p>
               </div>
             ) : order.payments?.some(p => p.status === 'pending') ? (
-              <div className="p-4 bg-amber-50 rounded-card border border-amber-100 text-center space-y-1.5">
+              <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-center space-y-1.5">
                 <span className="text-2xl">⏳</span>
                 <p className="text-xs font-bold text-amber-800">Menunggu Konfirmasi Pembayaran</p>
                 <p className="text-[10px] text-amber-600">Bukti pembayaran Anda sudah diunggah dan sedang diverifikasi oleh admin kami.</p>
@@ -315,12 +339,12 @@ const OrderDetail = () => {
                 </span>
 
                 {paymentSuccess && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-input text-success text-[10px] font-semibold">
+                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-md text-emerald-700 text-[10px] font-semibold">
                     {paymentSuccess}
                   </div>
                 )}
                 {paymentError && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-input text-error text-[10px] font-semibold">
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-md text-red-700 text-[10px] font-semibold">
                     {paymentError}
                   </div>
                 )}
@@ -333,7 +357,7 @@ const OrderDetail = () => {
                     <select
                       value={method}
                       onChange={(e) => setMethod(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText bg-white"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-800 bg-white"
                     >
                       <option value="transfer">Bank Transfer</option>
                       <option value="qris">QRIS</option>
@@ -349,7 +373,7 @@ const OrderDetail = () => {
                         type="file"
                         accept="image/*"
                         onChange={(e) => setProofFile(e.target.files[0])}
-                        className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-btn file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                        className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                       />
                     </div>
                   )}
@@ -357,9 +381,9 @@ const OrderDetail = () => {
                   <button
                     type="submit"
                     disabled={isUploading}
-                    className={`w-full py-2.5 text-xs font-bold text-white rounded-btn shadow-sm transition-colors ${isUploading
+                    className={`w-full py-3 text-xs font-bold text-white rounded-md shadow-sm transition-all duration-150 ${isUploading
                         ? 'bg-slate-400 cursor-not-allowed'
-                        : 'bg-primary hover:bg-primary-hover shadow-blue-500/10'
+                        : 'bg-primary hover:brightness-110 active:scale-95'
                       }`}
                   >
                     {isUploading ? 'Mengunggah...' : 'Kirim Bukti Pembayaran'}

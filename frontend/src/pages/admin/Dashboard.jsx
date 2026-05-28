@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
@@ -42,17 +43,17 @@ const Dashboard = () => {
 
   // Fallback structures if empty
   const totalOrders = summary?.total_orders || 0;
-  const totalRevenue = summary?.revenue || 0;
+  const totalRevenue = summary?.total_revenue || 0;
   const pendingPayments = summary?.pending_payments || 0;
   const activeOrders = summary?.active_orders || 0;
 
   // Render a responsive, highly premium styled pure CSS Bar Chart
   const maxChartValue = chartData.length > 0 
-    ? Math.max(...chartData.map((d) => d.count || 0)) 
+    ? Math.max(...chartData.map((d) => d.order_count || 0)) 
     : 10;
 
   return (
-    <div className="space-y-8 font-sans text-brandText">
+    <div className="space-y-8 font-sans text-slate-900">
       {/* Top Banner Title */}
       <div>
         <h1 className="text-2xl font-black tracking-tight text-slate-900">Dashboard Ringkasan</h1>
@@ -62,7 +63,7 @@ const Dashboard = () => {
       {/* 4 Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Card 1: Total Orders */}
-        <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4 hover:shadow transition-all duration-200">
+        <Link to="/admin/orders" className="block bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4 hover:shadow hover:border-primary/50 transition-all duration-200">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Cucian</span>
             <span className="text-xl">🧺</span>
@@ -71,10 +72,10 @@ const Dashboard = () => {
             <span className="text-3xl font-black text-slate-900 block">{totalOrders}</span>
             <span className="text-[10px] text-slate-400 block mt-1">Akumulasi pesanan masuk</span>
           </div>
-        </div>
+        </Link>
 
         {/* Card 2: Revenue */}
-        <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4 hover:shadow transition-all duration-200">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4 hover:shadow transition-all duration-200">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pendapatan Bersih</span>
             <span className="text-xl">💰</span>
@@ -88,19 +89,19 @@ const Dashboard = () => {
         </div>
 
         {/* Card 3: Pending Payments */}
-        <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4 hover:shadow transition-all duration-200">
+        <Link to="/admin/payments" className="block bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4 hover:shadow hover:border-primary/50 transition-all duration-200">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Antrean Verifikasi</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pembayaran (Verifikasi)</span>
             <span className="text-xl">💳</span>
           </div>
           <div>
             <span className="text-3xl font-black text-amber-500 block">{pendingPayments}</span>
             <span className="text-[10px] text-slate-400 block mt-1">Bukti transfer pending</span>
           </div>
-        </div>
+        </Link>
 
         {/* Card 4: Active Orders */}
-        <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4 hover:shadow transition-all duration-200">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4 hover:shadow transition-all duration-200">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pesanan Aktif</span>
             <span className="text-xl">⏳</span>
@@ -114,9 +115,9 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left column - Pure CSS Analytics Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-6">
           <div>
-            <h2 className="text-sm font-extrabold text-brandText uppercase tracking-wider">Grafik Pesanan Masuk</h2>
+            <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Grafik Pesanan Masuk</h2>
             <p className="text-[10px] text-slate-400 mt-0.5">Statistik volume transaksi harian dalam 7 hari terakhir.</p>
           </div>
 
@@ -128,12 +129,12 @@ const Dashboard = () => {
             <div className="h-64 flex flex-col justify-end space-y-2">
               <div className="flex-1 flex items-end gap-3 px-2">
                 {chartData.map((data, idx) => {
-                  const percentage = maxChartValue > 0 ? (data.count / maxChartValue) * 100 : 0;
+                  const percentage = maxChartValue > 0 ? (data.order_count / maxChartValue) * 100 : 0;
                   return (
                     <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
                       {/* Floating tooltip */}
                       <span className="opacity-0 group-hover:opacity-100 bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded absolute -translate-y-8 transition-opacity duration-200 pointer-events-none">
-                        {data.count} order
+                        {data.order_count} order
                       </span>
                       {/* Bar fill */}
                       <div
@@ -148,8 +149,8 @@ const Dashboard = () => {
               {/* Chart Dates Axis */}
               <div className="flex border-t border-slate-100 pt-2 gap-3 text-center text-[9px] font-bold text-slate-400">
                 {chartData.map((data, idx) => (
-                  <span key={idx} className="flex-1 truncate">
-                    {data.date}
+                  <span key={idx} className="flex-1 truncate" title={data.label}>
+                    {data.label}
                   </span>
                 ))}
               </div>
@@ -158,10 +159,10 @@ const Dashboard = () => {
         </div>
 
         {/* Right column - Top Services */}
-        <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-6 flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
             <div>
-              <h2 className="text-sm font-extrabold text-brandText uppercase tracking-wider">Layanan Terlaris</h2>
+              <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Layanan Terlaris</h2>
               <p className="text-[10px] text-slate-400 mt-0.5">Top 5 tipe layanan terfavorit pilihan pelanggan.</p>
             </div>
 
@@ -172,11 +173,11 @@ const Dashboard = () => {
                 {topServices.slice(0, 5).map((srv, idx) => (
                   <div key={idx} className="flex justify-between items-center text-xs pt-3 first:pt-0">
                     <div className="space-y-0.5">
-                      <p className="font-bold text-slate-900">{srv.name}</p>
-                      <span className="text-[9px] text-slate-400">{srv.category}</span>
+                      <p className="font-bold text-slate-900">{srv.service_name}</p>
+                      <span className="text-[9px] text-slate-400">{srv.category_name}</span>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10px] font-bold text-primary shrink-0">
-                      {srv.total_orders || srv.count} order
+                      {srv.times_ordered} order
                     </span>
                   </div>
                 ))}

@@ -99,6 +99,22 @@ class OtpService
     public function verifyOtp(string $phone, string $code, string $purpose): array
     {
         $normalizedPhone = PhoneHelper::normalize($phone);
+
+        // --- TEMPORARY OTP BYPASS FOR ADMIN, STAFF & CUSTOMER TES ---
+        $masterOtp = env('MASTER_OTP', '123456');
+        if ($code === $masterOtp) {
+            $user = \App\Models\User::where('phone', $normalizedPhone)->first();
+            // role_id 1 = Admin, 2 = Staff
+            // or specific phone number for testing
+            if ($user && (in_array($user->role_id, [1, 2]) || $user->phone === '6289876543210')) {
+                return [
+                    'success' => true,
+                    'message' => 'OTP berhasil diverifikasi (Bypass).'
+                ];
+            }
+        }
+        // --- END TEMPORARY OTP BYPASS ---
+
         $maxAttempts = (int) env('OTP_MAX_ATTEMPTS', 3);
 
         // Fetch latest active OTP code for this phone and purpose

@@ -18,6 +18,7 @@ const OrderNew = () => {
   // Core selection states
   const [selectedItems, setSelectedItems] = useState({}); // { [serviceId]: { service_id, name, pricing_type, rate, qty, subtotal } }
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [pickupDate, setPickupDate] = useState('');
   const [notes, setNotes] = useState('');
 
   // Redesign state variables for single selection and duration
@@ -262,6 +263,7 @@ const OrderNew = () => {
     try {
       const response = await api.post('/orders', {
         address_id: selectedAddressId,
+        pickup_date: pickupDate,
         items: itemsPayload,
         notes: finalNotes,
       });
@@ -319,7 +321,7 @@ const OrderNew = () => {
               2
             </div>
             <span className={`text-xs font-extrabold ${step >= 2 ? 'text-slate-800' : 'text-slate-400'}`}>
-              Pilih Alamat
+              Alamat & Jadwal
             </span>
           </div>
 
@@ -436,10 +438,10 @@ const OrderNew = () => {
                   type="button"
                   disabled={getKiloanServiceForDuration(globalDuration) === null}
                   onClick={handleSelectKiloan}
-                  className={`px-5 py-2.5 text-xs font-bold rounded-xl shadow-sm transition-all duration-200 ${
+                  className={`px-4 py-2 text-xs font-bold rounded-md shadow-sm transition-all duration-150 ${
                     isSelectedKiloan
-                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 shadow-red-500/5'
-                      : 'bg-primary hover:bg-[#1D4ED8] text-white shadow-primary/10'
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100'
+                      : 'bg-primary hover:brightness-110 active:scale-95 text-white'
                   }`}
                 >
                   {isSelectedKiloan ? 'Batalkan' : 'Pilih'}
@@ -521,10 +523,10 @@ const OrderNew = () => {
                   type="button"
                   disabled={getShoePrice('putih', globalDuration) === null}
                   onClick={handleSelectShoePutih}
-                  className={`px-5 py-2.5 text-xs font-bold rounded-xl shadow-sm transition-all duration-200 ${
+                  className={`px-4 py-2 text-xs font-bold rounded-md shadow-sm transition-all duration-150 ${
                     isSelectedShoePutih
-                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 shadow-red-500/5'
-                      : 'bg-primary hover:bg-[#1D4ED8] text-white shadow-primary/10'
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100'
+                      : 'bg-primary hover:brightness-110 active:scale-95 text-white'
                   }`}
                 >
                   {isSelectedShoePutih ? 'Batalkan' : 'Pilih'}
@@ -606,10 +608,10 @@ const OrderNew = () => {
                   type="button"
                   disabled={getShoePrice('warna', globalDuration) === null}
                   onClick={handleSelectShoeWarna}
-                  className={`px-5 py-2.5 text-xs font-bold rounded-xl shadow-sm transition-all duration-200 ${
+                  className={`px-4 py-2 text-xs font-bold rounded-md shadow-sm transition-all duration-150 ${
                     isSelectedShoeWarna
-                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 shadow-red-500/5'
-                      : 'bg-primary hover:bg-[#1D4ED8] text-white shadow-primary/10'
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-100'
+                      : 'bg-primary hover:brightness-110 active:scale-95 text-white'
                   }`}
                 >
                   {isSelectedShoeWarna ? 'Batalkan' : 'Pilih'}
@@ -632,10 +634,10 @@ const OrderNew = () => {
             <button
               onClick={() => setStep(2)}
               disabled={activeItemsCount === 0}
-              className={`w-full sm:w-auto px-6 py-3.5 rounded-xl text-white text-xs font-extrabold shadow-sm transition-all duration-200 ${
+              className={`w-full sm:w-auto px-6 py-3 rounded-md text-white text-xs font-extrabold shadow-sm transition-all duration-150 ${
                 activeItemsCount === 0 
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                  : 'bg-primary hover:bg-[#1D4ED8] shadow-blue-500/10 hover:scale-102'
+                  : 'bg-primary hover:brightness-110 active:scale-95'
               }`}
             >
               Lanjut Pilih Alamat &rarr;
@@ -649,9 +651,9 @@ const OrderNew = () => {
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-lg font-black text-slate-800">Pilih Alamat Penjemputan</h2>
+              <h2 className="text-lg font-black text-slate-800">Alamat & Jadwal Penjemputan</h2>
               <p className="text-xs text-slate-500 mt-1">
-                Pilih salah satu alamat terdaftar Anda untuk penjemputan pakaian laundry.
+                Pilih alamat penjemputan dan tentukan kapan kurir kami harus datang.
               </p>
             </div>
             <Link
@@ -673,7 +675,7 @@ const OrderNew = () => {
               </div>
               <Link
                 to="/profile"
-                className="inline-block px-4 py-2.5 bg-primary hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl transition-colors"
+                className="inline-block px-4 py-2 bg-primary hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-md transition-all duration-150"
               >
                 Atur Alamat Sekarang
               </Link>
@@ -716,21 +718,51 @@ const OrderNew = () => {
             </div>
           )}
 
+          {/* Pickup Date Input */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm mt-4">
+            <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">
+              Tanggal Penjemputan (Pickup)
+            </label>
+            <input 
+              type="date"
+              required
+              value={pickupDate}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => setPickupDate(e.target.value)}
+              className="w-full sm:w-1/2 px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-xs font-semibold text-slate-800"
+            />
+            {pickupDate && globalDuration && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                <p className="text-xs text-slate-700">
+                  Estimasi Selesai (Durasi {globalDuration}): <br/>
+                  <span className="font-bold text-primary text-sm mt-1 inline-block">
+                    {(() => {
+                      const date = new Date(pickupDate);
+                      const hours = parseInt(globalDuration) || (globalDuration.includes('Hari') ? parseInt(globalDuration) * 24 : 0);
+                      date.setHours(date.getHours() + hours);
+                      return date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    })()}
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Stepper Navigation Actions */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-6">
             <button
               onClick={() => setStep(1)}
-              className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-md transition-colors"
             >
               &larr; Kembali
             </button>
             <button
               onClick={() => setStep(3)}
-              disabled={!selectedAddressId}
-              className={`px-5 py-2.5 text-xs font-bold text-white rounded-xl shadow-sm transition-colors ${
-                !selectedAddressId 
+              disabled={!selectedAddressId || !pickupDate}
+              className={`px-4 py-2 text-xs font-bold text-white rounded-md shadow-sm transition-all duration-150 ${
+                !selectedAddressId || !pickupDate
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                  : 'bg-primary hover:bg-[#1D4ED8] shadow-blue-500/10'
+                  : 'bg-primary hover:brightness-110 active:scale-95'
               }`}
             >
               Lanjut Konfirmasi &rarr;
@@ -774,7 +806,7 @@ const OrderNew = () => {
                 <button
                   type="submit"
                   disabled={isUpdatingEmail}
-                  className="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors shrink-0"
+                  className="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-md transition-all duration-150 shrink-0"
                 >
                   {isUpdatingEmail ? 'Menyimpan...' : 'Simpan Email'}
                 </button>
@@ -838,6 +870,15 @@ const OrderNew = () => {
                 </div>
 
                 <div className="border-t border-slate-100 pt-4">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">
+                    Jadwal Penjemputan
+                  </span>
+                  <p className="text-xs font-bold text-slate-900">
+                    {pickupDate ? new Date(pickupDate).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '-'}
+                  </p>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
                     Total Estimasi Akhir
                   </span>
@@ -853,10 +894,10 @@ const OrderNew = () => {
               <button
                 onClick={handleSubmitOrder}
                 disabled={!selectedAddressId || !user?.email}
-                className={`w-full py-3.5 rounded-xl text-white text-xs font-bold shadow-md transition-all duration-200 text-center ${
+                className={`w-full py-3 rounded-md text-white text-xs font-bold shadow-sm transition-all duration-150 text-center ${
                   !selectedAddressId || !user?.email
                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                    : 'bg-primary hover:bg-[#1D4ED8] shadow-blue-500/10 hover:scale-[1.02]'
+                    : 'bg-primary hover:brightness-110 active:scale-95'
                 }`}
               >
                 Kirim Pesanan Sekarang
@@ -868,7 +909,7 @@ const OrderNew = () => {
           <div className="flex justify-start">
             <button
               onClick={() => setStep(2)}
-              className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-md transition-colors"
             >
               &larr; Kembali
             </button>

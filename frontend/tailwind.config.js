@@ -24,7 +24,7 @@ export default {
         error: '#EF4444',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
       },
       borderRadius: {
         card: '12px',

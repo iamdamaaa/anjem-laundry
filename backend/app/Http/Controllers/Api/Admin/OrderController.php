@@ -23,9 +23,12 @@ class OrderController extends Controller
         $user = $request->user();
         $query = Order::with(['user', 'staff', 'items']);
 
-        // Staff can only see orders assigned to them
+        // Staff can see orders assigned to them, AND new unassigned orders
         if ($user->role->name === 'staff') {
-            $query->where('assigned_staff_id', $user->id);
+            $query->where(function ($q) use ($user) {
+                $q->where('assigned_staff_id', $user->id)
+                  ->orWhereNull('assigned_staff_id');
+            });
         } else {
             // Admin filters
             if ($request->has('staff_id')) {
@@ -160,6 +163,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'items'                     => 'required|array|min:1',
             'items.*.item_id'           => 'required|exists:order_items,id',
+            'items.*.service_id'        => 'nullable|exists:services,id',
             'items.*.weight_actual_kg'  => 'nullable|numeric|min:0.1',
             'items.*.quantity_actual'   => 'nullable|integer|min:1',
             'items.*.notes'             => 'nullable|string',
@@ -185,6 +189,19 @@ class OrderController extends Controller
                 }
 
                 $subtotalActual = 0.00;
+
+                // Handle service change
+                if (!empty($inputItem['service_id']) && $inputItem['service_id'] != $orderItem->service_id) {
+                    $newService = \App\Models\Service::find($inputItem['service_id']);
+                    if ($newService) {
+                        $orderItem->service_id = $newService->id;
+                        $orderItem->service_name_snapshot = $newService->name;
+                        $orderItem->price_per_kg_snapshot = $newService->price_per_kg;
+                        $orderItem->price_per_unit_snapshot = $newService->price_per_unit;
+                        $orderItem->pricing_type_snapshot = $newService->pricing_type;
+                        $orderItem->duration_label_snapshot = $newService->duration_label;
+                    }
+                }
 
                 if ($orderItem->pricing_type_snapshot === 'by_weight') {
                     if (empty($inputItem['weight_actual_kg'])) {
@@ -328,6 +345,11 @@ class OrderController extends Controller
                 $updateData['delivery_done_at'] = now();
             }
 
+            // Auto-assign staff if the order is unassigned and a staff member processes it
+            if ($user->role->name === 'staff' && is_null($order->assigned_staff_id)) {
+                $updateData['assigned_staff_id'] = $user->id;
+            }
+
             $order->update($updateData);
 
             // Log transitions
@@ -398,6 +420,89 @@ class OrderController extends Controller
             'success' => true,
             'message' => 'Berhasil mengambil logs status pesanan',
             'data'    => $logs
+        ]);
+    }
+
+    /**
+     * Delete an order (Admin & Staff).
+     * DELETE /admin/orders/{id}
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+                'error'   => 'ORDER_NOT_FOUND',
+                'details' => null
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Soft delete the order only.
+            // Items, logs, and payments are kept intact in the database for history/restoration.
+            $order->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesanan berhasil dibatalkan dan dihapus dari sistem.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Deleting order failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus pesanan.',
+                'error'   => 'SERVER_ERROR',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update completion date manually (Admin & Staff).
+     * PATCH /admin/orders/{id}/completion-date
+     */
+    public function updateCompletionDate(Request $request, int $id): JsonResponse
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+                'error'   => 'ORDER_NOT_FOUND',
+                'details' => null
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'completion_date' => 'required|date'
+        ]);
+
+        $order->update([
+            'completion_date' => $validated['completion_date']
+        ]);
+
+        // Log the change
+        OrderStatusLog::create([
+            'order_id'   => $order->id,
+            'actor_id'   => $request->user()->id,
+            'actor_type' => $request->user()->role->name === 'admin' ? 'admin' : 'staff',
+            'old_status' => $order->order_status,
+            'new_status' => $order->order_status,
+            'notes'      => 'Tanggal selesai (estimasi) diubah secara manual.',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tanggal selesai berhasil diperbarui secara manual',
+            'data'    => $order
         ]);
     }
 }

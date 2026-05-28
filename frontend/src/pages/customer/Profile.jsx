@@ -138,12 +138,12 @@ const Profile = () => {
     <div className="space-y-8 font-sans max-w-4xl mx-auto">
       
       {/* Top Banner with Avatar Placeholder */}
-      <div className="bg-white p-6 sm:p-8 rounded-card border border-slate-200/60 shadow-sm flex flex-col sm:flex-row items-center gap-6">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col sm:flex-row items-center gap-6">
         <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-indigo-600 text-white flex items-center justify-center font-black text-3xl shadow-lg shadow-blue-500/20 ring-4 ring-blue-50">
           {nameInitial}
         </div>
         <div className="space-y-1 text-center sm:text-left">
-          <h1 className="text-xl sm:text-2xl font-black text-brandText">{name}</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900">{name}</h1>
           <p className="text-xs text-slate-500">{user?.phone}</p>
           <span className="inline-block mt-1 px-2.5 py-0.5 rounded bg-blue-50 border border-blue-100 text-[10px] font-bold text-primary">
             Customer Member
@@ -154,16 +154,16 @@ const Profile = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column - Profile Details Form */}
-        <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4 h-fit">
-          <h2 className="text-base font-extrabold text-brandText border-b border-slate-50 pb-2">Informasi Kontak</h2>
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4 h-fit">
+          <h2 className="text-base font-extrabold text-slate-900 border-b border-slate-50 pb-2">Informasi Kontak</h2>
           
           {profileSuccess && (
-            <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-input text-success text-xs font-semibold">
+            <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-md text-emerald-700 text-xs font-semibold">
               ✅ {profileSuccess}
             </div>
           )}
           {profileError && (
-            <div className="p-3 bg-red-50 border border-red-100 rounded-input text-error text-xs font-semibold">
+            <div className="p-3 bg-red-50 border border-red-100 rounded-md text-red-700 text-xs font-semibold">
               ⚠️ {profileError}
             </div>
           )}
@@ -179,7 +179,7 @@ const Profile = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
               />
             </div>
 
@@ -193,7 +193,7 @@ const Profile = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
                 placeholder="nama@email.com"
               />
               <span className="text-[10px] text-slate-400 block mt-1 leading-normal">
@@ -204,10 +204,10 @@ const Profile = () => {
             <button
               type="submit"
               disabled={isSavingProfile}
-              className={`w-full py-2.5 text-xs font-bold text-white rounded-btn shadow-sm transition-colors ${
+              className={`w-full py-2.5 text-xs font-bold text-white rounded-md shadow-sm transition-all duration-150 ${
                 isSavingProfile 
                   ? 'bg-slate-400 cursor-not-allowed' 
-                  : 'bg-primary hover:bg-primary-hover shadow-blue-500/10'
+                  : 'bg-primary hover:brightness-110 active:scale-95'
               }`}
             >
               {isSavingProfile ? 'Menyimpan...' : 'Perbarui Profil'}
@@ -219,11 +219,11 @@ const Profile = () => {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Address List Title Area */}
-          <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm flex justify-between items-center">
-            <h2 className="text-base font-extrabold text-brandText">Buku Alamat Saya</h2>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex justify-between items-center">
+            <h2 className="text-base font-extrabold text-slate-900">Buku Alamat Saya</h2>
             <button
               onClick={() => setShowAddressForm(!showAddressForm)}
-              className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-btn transition-colors"
+              className="px-4 py-2 bg-primary hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-md transition-all duration-150"
             >
               {showAddressForm ? 'Batal' : '+ Alamat Baru'}
             </button>
@@ -231,9 +231,9 @@ const Profile = () => {
 
           {/* New Address Dialog Inline Form */}
           {showAddressForm && (
-            <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm space-y-4 animate-in fade-in zoom-in-95">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-4 animate-fade-in-up">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Tambah Alamat Baru</h3>
-              {addressError && <p className="text-xs text-error font-bold">{addressError}</p>}
+              {addressError && <p className="text-xs text-red-600 font-bold">{addressError}</p>}
               
               <form onSubmit={handleAddressSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -245,7 +245,7 @@ const Profile = () => {
                     required
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
                   />
                 </div>
 
@@ -258,7 +258,7 @@ const Profile = () => {
                     required
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
                   />
                 </div>
 
@@ -271,7 +271,7 @@ const Profile = () => {
                     required
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
                   />
                 </div>
 
@@ -284,7 +284,7 @@ const Profile = () => {
                     required
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
                   />
                 </div>
 
@@ -297,7 +297,7 @@ const Profile = () => {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     rows={2}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-brandText"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-900"
                     placeholder="Nama Jalan, Blok, No Rumah, RT/RW, Patokan"
                   />
                 </div>
@@ -319,7 +319,7 @@ const Profile = () => {
                   <button
                     type="submit"
                     disabled={isSavingAddress}
-                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-btn shadow-sm transition-colors"
+                    className="px-4 py-2 bg-primary hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-md shadow-sm transition-all duration-150"
                   >
                     {isSavingAddress ? 'Menyimpan...' : 'Simpan Alamat'}
                   </button>
@@ -330,7 +330,7 @@ const Profile = () => {
 
           {/* Dynamic Address Cards List */}
           {addresses.length === 0 ? (
-            <div className="bg-white p-12 rounded-card border border-slate-200/60 shadow-sm text-center text-slate-500">
+            <div className="bg-white p-12 rounded-2xl border border-slate-200/60 shadow-sm text-center text-slate-500">
               <p className="text-xs italic">Belum ada daftar alamat tersimpan. Silakan tambahkan alamat baru.</p>
             </div>
           ) : (
@@ -338,7 +338,7 @@ const Profile = () => {
               {addresses.map((addr) => (
                 <div
                   key={addr.id}
-                  className={`bg-white p-5 rounded-card border transition-smooth flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+                  className={`bg-white p-6 rounded-2xl border transition-all duration-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
                     addr.is_default ? 'border-primary ring-1 ring-primary/5' : 'border-slate-200/60'
                   }`}
                 >
@@ -360,14 +360,14 @@ const Profile = () => {
                     {!addr.is_default && (
                       <button
                         onClick={() => handleSetDefault(addr.id)}
-                        className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-brandText text-[10px] font-bold rounded-btn transition-colors"
+                        className="px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 text-[10px] font-bold rounded-md transition-colors"
                       >
                         Set Default
                       </button>
                     )}
                     <button
                       onClick={() => handleDeleteAddress(addr.id)}
-                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-error text-[10px] font-bold rounded-btn transition-colors"
+                      className="px-4 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-[10px] font-bold rounded-md transition-colors"
                     >
                       Hapus
                     </button>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
@@ -100,11 +101,11 @@ const Payments = () => {
   }
 
   return (
-    <div className="space-y-6 font-sans text-brandText relative">
+    <div className="space-y-6 font-sans text-slate-900 relative">
       
       {/* Header Info */}
-      <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm">
-        <h1 className="text-2xl font-black text-brandText tracking-tight">Verifikasi Bukti Pembayaran</h1>
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Verifikasi Bukti Pembayaran</h1>
         <p className="text-xs text-slate-500 mt-1">
           Review lampiran bukti transfer dana perbankan / e-wallet yang dikirimkan oleh customer secara cermat.
         </p>
@@ -112,12 +113,12 @@ const Payments = () => {
 
       {/* Operations feedback alerts */}
       {alertSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-card text-success text-xs font-semibold">
+        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-success text-xs font-semibold">
           ✅ {alertSuccess}
         </div>
       )}
       {alertError && (
-        <div className="p-4 bg-red-50 border border-red-100 rounded-card text-error text-xs font-semibold">
+        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-error text-xs font-semibold">
           ⚠️ {alertError}
         </div>
       )}
@@ -126,7 +127,7 @@ const Payments = () => {
       {zoomImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setZoomImage(null)}></div>
-          <div className="relative max-w-lg w-full bg-white p-2 rounded-card shadow-lg flex flex-col items-center">
+          <div className="relative max-w-lg w-full bg-white p-2 rounded-2xl shadow-lg flex flex-col items-center">
             <button
               onClick={() => setZoomImage(null)}
               className="absolute -top-10 right-0 text-white font-extrabold text-sm bg-slate-800 px-3 py-1 rounded-full hover:bg-slate-700"
@@ -136,14 +137,14 @@ const Payments = () => {
             <img
               src={zoomImage}
               alt="Bukti Bayar Zoom"
-              className="max-h-[80vh] object-contain rounded-input"
+              className="max-h-[80vh] object-contain rounded-md"
             />
           </div>
         </div>
       )}
 
       {/* Dynamic Tabular Payments List */}
-      <div className="bg-white rounded-card border border-slate-200/60 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -201,7 +202,7 @@ const Payments = () => {
                               src={imageUrl}
                               alt="Bukti Thumbnail"
                               onClick={() => setZoomImage(imageUrl)}
-                              className="w-12 h-12 object-cover rounded-input border border-slate-200 cursor-pointer hover:opacity-85 hover:scale-105 transition-all shadow-sm"
+                              className="w-12 h-12 object-cover rounded-md border border-slate-200 cursor-pointer hover:opacity-85 hover:scale-105 transition-all shadow-sm"
                             />
                           </div>
                         ) : (
@@ -222,14 +223,14 @@ const Payments = () => {
                               <button
                                 disabled={isProcessing}
                                 onClick={() => handleVerifyPayment(p.id)}
-                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold rounded-btn transition-colors shadow-sm"
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold rounded-md transition-colors shadow-sm"
                               >
                                 Verifikasi (Lunas)
                               </button>
                               <button
                                 disabled={isProcessing}
                                 onClick={() => setShowRejectionForm(showRejectionForm === p.id ? null : p.id)}
-                                className="px-3 py-1.5 bg-error hover:bg-red-600 text-white text-[10px] font-bold rounded-btn transition-colors shadow-sm"
+                                className="px-3 py-1.5 bg-error hover:bg-red-600 text-white text-[10px] font-bold rounded-md transition-colors shadow-sm"
                               >
                                 Tolak
                               </button>
@@ -237,7 +238,7 @@ const Payments = () => {
 
                             {/* Rejection input dialog inline panel */}
                             {showRejectionForm === p.id && (
-                              <div className="mt-2 space-y-1.5 w-48 text-left bg-slate-50 p-2.5 rounded-input border border-slate-200">
+                              <div className="mt-2 space-y-1.5 w-48 text-left bg-slate-50 p-2.5 rounded-md border border-slate-200">
                                 <label className="block text-[8px] font-bold uppercase text-slate-500">
                                   Alasan Penolakan:
                                 </label>
@@ -249,11 +250,11 @@ const Payments = () => {
                                     ...rejectionReasonInput,
                                     [p.id]: e.target.value,
                                   })}
-                                  className="w-full px-2 py-1 border border-slate-200 rounded-input text-[10px] focus:outline-none focus:ring-1 focus:ring-red-500 bg-white"
+                                  className="w-full px-2 py-1 border border-slate-200 rounded-md text-[10px] focus:outline-none focus:ring-1 focus:ring-red-500 bg-white"
                                 />
                                 <button
                                   onClick={() => handleRejectPayment(p.id)}
-                                  className="w-full py-1 bg-error text-white text-[9px] font-bold rounded-btn transition-colors"
+                                  className="w-full py-1 bg-error text-white text-[9px] font-bold rounded-md transition-colors"
                                 >
                                   Submit Tolak
                                 </button>

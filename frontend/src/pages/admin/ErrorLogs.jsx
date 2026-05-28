@@ -1,143 +1,124 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
 const ErrorLogs = () => {
   const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [typeFilter, setTypeFilter] = useState('');
 
-  const fetchErrorLogs = async () => {
+  const fetchLogs = async () => {
     try {
-      const url = typeFilter 
-        ? `/admin/logs/errors?type=${typeFilter}`
-        : '/admin/logs/errors';
-        
-      const response = await api.get(url);
-      if (response.data && response.data.success) {
-        setLogs(response.data.data);
+      setIsLoading(true);
+      const res = await api.get('/admin/logs/errors');
+      if (res.data?.success) {
+        setLogs(res.data.data);
       }
     } catch (err) {
-      console.error('Failed to load admin error logs:', err);
+      toast.error('Gagal mengambil data error logs.');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchErrorLogs();
-  }, [typeFilter]);
+    fetchLogs();
+  }, []);
+
+  const getBadgeColor = (type) => {
+    switch (type?.toUpperCase()) {
+      case 'FATAL': return 'bg-red-100 text-red-700 border-red-200';
+      case 'ERROR': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'WARNING': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  };
+
+  if (isLoading) return <LoadingSpinner message="Memuat logs..." />;
 
   return (
-    <div className="space-y-6 font-sans text-brandText">
-      
-      {/* Header Panel */}
-      <div className="bg-white p-6 rounded-card border border-slate-200/60 shadow-sm">
-        <h1 className="text-2xl font-black text-brandText tracking-tight">Logs Diagnostik & Error</h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Daftar kendala teknis terlaporkan baik dari sisi klien (frontend Javascript window.onerror) maupun server (backend Laravel exception tracker).
-        </p>
-      </div>
-
-      {/* Filter toolbar */}
-      <div className="bg-white p-4 rounded-card border border-slate-200/60 shadow-sm flex items-center gap-3">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Filter Tipe Kesalahan:</span>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-2.5 py-1.5 border border-slate-200 rounded-input text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary text-brandText bg-white"
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">System Error Logs</h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Pantau dan analisis log error aplikasi secara real-time.
+          </p>
+        </div>
+        <button
+          onClick={fetchLogs}
+          className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors whitespace-nowrap flex items-center gap-2"
         >
-          <option value="">Semua Tipe Error</option>
-          <option value="QueryException">QueryException (Database)</option>
-          <option value="ValidationException">ValidationException</option>
-          <option value="ModelNotFoundException">ModelNotFoundException</option>
-          <option value="ClientError">Client Error (Frontend)</option>
-        </select>
-        {typeFilter && (
-          <button
-            onClick={() => setTypeFilter('')}
-            className="text-xs font-semibold text-slate-500 hover:text-brandText"
-          >
-            Reset
-          </button>
-        )}
+          🔄 Refresh Logs
+        </button>
       </div>
 
-      {/* Tabular Error logs Grid */}
-      <div className="bg-white rounded-card border border-slate-200/60 shadow-sm overflow-hidden">
+      {/* Table */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[9px] bg-slate-50/50">
-                <th className="p-4">Waktu & IP Address</th>
-                <th className="p-4">Sumber</th>
-                <th className="p-4">Tipe / Kategori</th>
-                <th className="p-4">Pesan Error (Message)</th>
-                <th className="p-4">URL Terkait</th>
-                <th className="p-4 text-center">User Pengakses</th>
+              <tr className="bg-slate-50 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-4 font-bold">Waktu</th>
+                <th className="px-6 py-4 font-bold">Pengguna</th>
+                <th className="px-6 py-4 font-bold">Tipe & Sumber</th>
+                <th className="px-6 py-4 font-bold">Pesan Error</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono text-[10px]">
-              {logs.length === 0 ? (
-                <tr className="font-sans">
-                  <td colSpan={6} className="p-8 text-center text-slate-400 italic">
-                    Tidak ditemukan catatan log error sistem.
+            <tbody className="divide-y divide-slate-100">
+              {logs.map(log => (
+                <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-xs font-semibold text-slate-600">{formatDate(log.created_at)}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {log.user ? (
+                      <div>
+                        <p className="font-bold text-slate-900 text-sm">{log.user.name}</p>
+                        <p className="text-[10px] text-slate-500">{log.user.email || log.user.phone}</p>
+                      </div>
+                    ) : (
+                      <span className="text-sm font-semibold text-slate-400 italic">Guest / System</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1.5 items-start">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${getBadgeColor(log.error_type)}`}>
+                        {log.error_type}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                        {log.source}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-slate-800 break-words max-w-md">
+                      {log.error_message}
+                    </div>
+                    {log.context && (
+                      <pre className="mt-2 p-2 bg-slate-900 text-slate-300 rounded text-[10px] overflow-x-auto max-w-md">
+                        {JSON.stringify(log.context, null, 2)}
+                      </pre>
+                    )}
                   </td>
                 </tr>
-              ) : (
-                logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-4">
-                      <span className="font-bold text-slate-900 block">
-                        {new Date(log.created_at).toLocaleString('id-ID', { hour12: false })}
-                      </span>
-                      <span className="text-[9px] text-slate-400 block mt-0.5">{log.ip_address || '127.0.0.1'}</span>
-                    </td>
-
-                    <td className="p-4 font-sans text-center">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border ${
-                        log.source === 'server'
-                          ? 'bg-red-50 text-error border-red-100'
-                          : 'bg-amber-50 text-amber-700 border-amber-100'
-                      }`}>
-                        {log.source || 'client'}
-                      </span>
-                    </td>
-
-                    <td className="p-4 font-bold text-slate-700 max-w-[130px] truncate">
-                      {log.error_type}
-                    </td>
-
-                    <td className="p-4 max-w-[280px]">
-                      <div className="p-2.5 bg-red-50/60 border border-red-100/50 rounded-input text-error leading-relaxed break-all whitespace-pre-wrap font-mono text-[9px]" title={log.error_message}>
-                        {log.error_message}
-                      </div>
-                      {log.stack_trace && (
-                        <details className="mt-1 text-[8px] text-slate-400 font-sans cursor-pointer">
-                          <summary className="hover:text-slate-600 font-semibold select-none">Tampilkan Stack Trace</summary>
-                          <pre className="mt-1 p-2 bg-slate-900 text-slate-200 rounded-input overflow-x-auto whitespace-pre leading-relaxed text-[8px] max-w-[320px] max-h-[150px]">
-                            {log.stack_trace}
-                          </pre>
-                        </details>
-                      )}
-                    </td>
-
-                    <td className="p-4 text-slate-500 font-mono text-[9px] truncate max-w-[150px]" title={log.request_url}>
-                      {log.request_url || '-'}
-                    </td>
-
-                    <td className="p-4 text-center font-sans">
-                      {log.user ? (
-                        <div className="flex flex-col items-center">
-                          <span className="font-bold text-slate-800 text-[10px]">{log.user.name}</span>
-                          <span className="text-[9px] text-slate-400">{log.user.phone}</span>
-                        </div>
-                      ) : (
-                        <span className="text-[9px] text-slate-400 italic">Guest</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
+              ))}
+              {logs.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="px-6 py-12 text-center">
+                    <div className="text-4xl mb-2">✨</div>
+                    <p className="text-slate-500 font-medium">Sistem berjalan dengan baik. Tidak ada error log.</p>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

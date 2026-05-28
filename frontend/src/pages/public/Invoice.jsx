@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import QRCode from 'react-qr-code';
 import api from '../../lib/api';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
@@ -60,15 +61,15 @@ const Invoice = () => {
   if (errorMsg || !order) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center font-sans">
-        <div className="max-w-md w-full bg-white p-8 rounded-card border border-slate-200 shadow-sm space-y-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <div className="w-12 h-12 rounded-full bg-red-50 text-error flex items-center justify-center text-xl mx-auto font-bold">
             ⚠️
           </div>
-          <h3 className="text-lg font-extrabold text-brandText">Terjadi Kendala</h3>
+          <h3 className="text-lg font-extrabold text-slate-900">Terjadi Kendala</h3>
           <p className="text-xs text-slate-500">{errorMsg || 'Rincian invoice gagal dimuat.'}</p>
           <a
             href="/"
-            className="inline-block px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-btn transition-colors"
+            className="inline-block px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-md transition-colors"
           >
             Kembali ke Beranda
           </a>
@@ -92,35 +93,48 @@ const Invoice = () => {
   const deliveryAddr = order.delivery_address_snapshot || {};
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-brandText print:bg-white print:py-0 print:text-black">
-      <div className="max-w-3xl mx-auto bg-white p-8 md:p-12 rounded-card border border-slate-200/80 shadow-sm print:shadow-none print:border-none print:p-0">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-900 print:bg-white print:py-0 print:text-black">
+      <div className="max-w-3xl mx-auto bg-white p-8 md:p-12 rounded-2xl border border-slate-200/80 shadow-sm print:shadow-none print:border-none print:p-0">
         
         {/* Actions Top Right */}
         <div className="flex justify-end mb-4 print:hidden">
           <button
             onClick={handlePrint}
-            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-btn shadow-sm transition-smooth flex items-center gap-2"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-md shadow-sm transition-smooth flex items-center gap-2"
           >
             <span>⬇️</span> Download PDF
           </button>
         </div>
 
         {/* Invoice Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-8 gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-black text-sm print:border print:border-black">
-                AL
-              </div>
-              <span className="text-xl font-black text-slate-900">Anjem Laundry</span>
-            </div>
-            <p className="text-xs text-slate-500">Premium Antar Jemput Laundry SPA</p>
+        <div className="flex justify-between items-start mb-10 pb-6 border-b border-slate-200">
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter">ANJEM LAUNDRY</h1>
+            <p className="text-slate-500 text-sm mt-1">Jasa Cuci Bersih & Wangi, Antar Jemput</p>
+            <p className="text-slate-400 text-xs mt-1">
+              Telp: 0812-3456-7890<br />
+              Email: halo@anjemlaundry.com
+            </p>
           </div>
-
-          <div className="text-left sm:text-right space-y-1">
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">INVOICE</h1>
-            <p className="text-xs font-semibold text-slate-500">No: {order.order_number}</p>
-            <p className="text-[10px] text-slate-400">{formattedDate}</p>
+          <div className="text-right flex flex-col items-end gap-3">
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">INVOICE</h2>
+            <div className="p-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <QRCode 
+                value={order.order_number} 
+                size={80} 
+                level="M" 
+                bgColor="#FFFFFF"
+                fgColor="#0f172a"
+              />
+            </div>
+            <div className="text-sm">
+              <span className="text-slate-500">Nomor Pesanan:</span>
+              <p className="font-extrabold text-slate-900">{order.order_number}</p>
+            </div>
+            <div className="text-sm">
+              <span className="text-slate-500">Tanggal Transaksi:</span>
+              <p className="font-bold text-slate-900">{formattedDate}</p>
+            </div>
           </div>
         </div>
 
@@ -221,6 +235,9 @@ const Invoice = () => {
                       <td className="py-4">
                         <p className="font-bold text-slate-950">{item.service_name_snapshot}</p>
                         <span className="text-[10px] text-slate-400">{item.category_name_snapshot}</span>
+                        {item.notes && (
+                          <p className="text-[10px] text-amber-600 mt-1 italic font-medium">Catatan Staf: {item.notes}</p>
+                        )}
                       </td>
                       <td className="py-4 text-center font-medium">{item.duration_label_snapshot}</td>
                       <td className="py-4 text-center font-medium">Rp {parseFloat(rate).toLocaleString('id-ID')}</td>
@@ -280,7 +297,7 @@ const Invoice = () => {
 
         {/* Notes snap */}
         {order.notes && (
-          <div className="mt-8 p-4 bg-slate-50 rounded-card border border-slate-100 text-xs">
+          <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
             <span className="font-extrabold block text-slate-500 mb-1">Catatan Tambahan:</span>
             <p className="text-slate-600 italic">"{order.notes}"</p>
           </div>
@@ -292,7 +309,7 @@ const Invoice = () => {
             href={`https://wa.me/628123456789?text=Halo%20Admin%20Anjem%20Laundry%2C%20saya%20ingin%20bertanya%20mengenai%20pesanan%20saya%20%23${order.order_number}`}
             target="_blank"
             rel="noreferrer"
-            className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-btn text-xs font-bold shadow-md shadow-emerald-500/10 transition-smooth text-center"
+            className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-bold shadow-sm transition-all duration-150 text-center"
           >
             💬 Hubungi via WhatsApp
           </a>

@@ -31,6 +31,9 @@ class DashboardController extends Controller
         // 4. Count of active/in-progress orders (status not completed)
         $activeOrders = Order::where('order_status', '!=', 'completed')->count();
 
+        // 5. Count of new/pending orders (status received)
+        $pendingOrders = Order::where('order_status', 'received')->count();
+
         return response()->json([
             'success' => true,
             'message' => 'Berhasil mengambil ringkasan dashboard',
@@ -39,6 +42,7 @@ class DashboardController extends Controller
                 'total_revenue'    => $totalRevenue,
                 'pending_payments' => $pendingPayments,
                 'active_orders'    => $activeOrders,
+                'pending_orders'   => $pendingOrders,
             ]
         ]);
     }
