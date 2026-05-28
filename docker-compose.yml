@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: laundry_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laundry_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laundry_backend
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/backend
+      - ./backend/storage:/var/www/backend/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laundry_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: laundry_frontend
+    restart: unless-stopped
+    networks:
+      - laundry_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: laundry_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./backend/storage/app/public:/var/www/storage:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - laundry_network
+
+  queue_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laundry_queue
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - ./backend:/var/www/backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laundry_network
+
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laundry_scheduler
+    restart: unless-stopped
+    command: >
+      sh -c "while true; do php /var/www/backend/artisan schedule:run --verbose --no-interaction & sleep 60; done"
+    volumes:
+      - ./backend:/var/www/backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laundry_network
+
+networks:
+  laundry_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
